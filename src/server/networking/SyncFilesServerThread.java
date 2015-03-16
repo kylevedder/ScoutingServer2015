@@ -6,7 +6,6 @@
 package server.networking;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,6 +13,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.JSONObject;
 
 /**
  *
@@ -54,31 +54,36 @@ public class SyncFilesServerThread implements Runnable
         init();
         while (isRunning)
         {
-            loop();
+            mainLoop();
         }
     }
 
     /**
      * Hook for the primary loop through the code.
      */
-    private void loop()
+    private void mainLoop()
     {
         try
         {
+            //block for new connection
             Socket socket = serverSocket.accept();
             System.out.println("Connection Recieved!");
-            InputStream ins = socket.getInputStream();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(ins)))
-            {
-                StringBuilder out = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null)
-                {
-                    out.append(line);
-                }
-                System.out.println(out.toString());   //Prints the string content read from input stream
-            }
 
+            //setup in and out
+            InputStream ins = socket.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(ins));
+
+            StringBuilder out = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null)
+            {
+                out.append(line);
+                out.append("\n");
+            }
+            String recievedString = out.toString();
+            System.out.println(recievedString);   //Prints the string content read from input stream
+            JSONObject json = new JSONObject(recievedString);
+            
         }
         catch (IOException ex)
         {
