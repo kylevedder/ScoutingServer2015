@@ -72,17 +72,32 @@ public class SyncFilesServerThread implements Runnable
             //setup in and out
             InputStream ins = socket.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(ins));
-
             StringBuilder out = new StringBuilder();
+            
+            //read from the client
             String line;
             while ((line = reader.readLine()) != null)
             {
                 out.append(line);
                 out.append("\n");
             }
+            
+            //construct final string
             String recievedString = out.toString();
+            
+            //split into individual JSON objects
+            String[] jsonStrings = recievedString.split("\n");
+            JSONObject[] jsonObjs = new JSONObject[jsonStrings.length];
+            
+            //add each JSON string as JSONObject to array
+            for (int i = 0; i < jsonStrings.length; i++)
+            {
+                String jsonString = jsonStrings[i];
+                jsonObjs[i] = new JSONObject(jsonString);
+            }                            
+            
             System.out.println(recievedString);   //Prints the string content read from input stream
-            JSONObject json = new JSONObject(recievedString);
+            
             
         }
         catch (IOException ex)
